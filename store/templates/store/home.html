@@ -1,0 +1,190 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}sweepKart — Premium Products & Deals{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+    <!-- Hero Banner -->
+    <div class="hero-banner mb-5 text-white">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-primary bg-opacity-25 text-primary mb-3 px-3 py-2 border border-primary border-opacity-25 rounded-pill">
+                    <i class="bi bi-stars me-1"></i> New Collection 2026
+                </span>
+                <h1 class="display-4 fw-extrabold mb-3">Discover Premium Tech & Lifestyle Gear</h1>
+                <p class="lead text-slate-300 mb-4 col-lg-10">
+                    Explore curated electronics, modern apparel, and top-rated books on sweepKart. Lightning fast checkout and smooth shopping experience.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#catalogGrid" class="btn btn-gradient btn-lg">
+                        <i class="bi bi-bag-check me-2"></i> Shop Now
+                    </a>
+                    <a href="?category=" class="btn btn-outline-gradient btn-lg">
+                        <i class="bi bi-grid-3x3-gap me-2"></i> View All Categories
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalog Section -->
+    <div id="catalogGrid" class="row g-4">
+        
+        <!-- Left Sidebar: Filters -->
+        <div class="col-lg-3">
+            <div class="glass-card p-4 sticky-top" style="top: 90px; z-index: 10;">
+                <h5 class="fw-bold mb-3 d-flex align-items-center justify-content-between text-white">
+                    <span><i class="bi bi-funnel me-2 text-primary"></i> Filter Products</span>
+                    {% if selected_category_slug or search_query or min_price or max_price %}
+                        <a href="{% url 'home' %}" class="small text-danger text-decoration-none">Reset</a>
+                    {% endif %}
+                </h5>
+
+                <!-- Search Active Indicator -->
+                {% if search_query %}
+                    <div class="mb-3 p-2 rounded bg-primary bg-opacity-10 border border-primary border-opacity-25 text-light small">
+                        Search: "<strong>{{ search_query }}</strong>"
+                    </div>
+                {% endif %}
+
+                <!-- Category Filters -->
+                <div class="mb-4">
+                    <h6 class="text-secondary uppercase fs-7 fw-bold mb-2">Categories</h6>
+                    <div class="d-flex flex-column gap-1">
+                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}" 
+                           class="category-filter-item {% if not selected_category_slug %}active{% endif %}">
+                            <i class="bi bi-collection me-2"></i> All Categories
+                        </a>
+                        {% for cat in categories %}
+                            <a href="?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                               class="category-filter-item {% if selected_category_slug == cat.slug %}active{% endif %}">
+                                <i class="bi bi-chevron-right me-2 small"></i> {{ cat.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Price Filter Form -->
+                <div>
+                    <h6 class="text-secondary uppercase fs-7 fw-bold mb-2">Price Range</h6>
+                    <form method="GET" action="{% url 'home' %}">
+                        {% if selected_category_slug %}
+                            <input type="hidden" name="category" value="{{ selected_category_slug }}">
+                        {% endif %}
+                        {% if search_query %}
+                            <input type="hidden" name="q" value="{{ search_query }}">
+                        {% endif %}
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <input type="number" class="form-control form-control-sm" name="min_price" placeholder="Min ₹" value="{{ min_price|default:'' }}">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" class="form-control form-control-sm" name="max_price" placeholder="Max ₹" value="{{ max_price|default:'' }}">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-outline-gradient btn-sm w-100">Apply Price Filter</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Product Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0 text-white">
+                    {% if selected_category_slug %}
+                        Category Products
+                    {% else %}
+                        Featured Products
+                    {% endif %}
+                </h4>
+                <span class="text-secondary small">{{ products.count }} product(s) found</span>
+            </div>
+
+            {% if products %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    {% for product in products %}
+                        <div class="col">
+                            <div class="glass-card h-100 d-flex flex-column">
+                                
+                                <!-- Product Image & SVG Fallback -->
+                                <a href="{% url 'product_detail' slug=product.slug %}" class="text-decoration-none">
+                                    <div class="product-img-box position-relative">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                                        {% else %}
+                                            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-secondary">
+                                                <i class="bi bi-box-seam fs-1 mb-1"></i>
+                                                <span class="small fw-semibold">sweepKart</span>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Category Pill Badge -->
+                                        <span class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-75 backdrop-blur border border-secondary text-light">
+                                            {{ product.category.name }}
+                                        </span>
+                                    </div>
+                                </a>
+
+                                <div class="p-4 d-flex flex-column flex-grow-1">
+                                    <h5 class="fw-bold text-white mb-2">
+                                        <a href="{% url 'product_detail' slug=product.slug %}" class="text-white text-decoration-none">
+                                            {{ product.name }}
+                                        </a>
+                                    </h5>
+                                    
+                                    <p class="text-secondary small mb-3 flex-grow-1">
+                                        {{ product.description|truncatewords:14 }}
+                                    </p>
+
+                                    <!-- Rating & Stock Badge -->
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="text-warning small">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-half"></i>
+                                        </div>
+
+                                        {% if product.in_stock %}
+                                            <span class="badge-stock small">In Stock ({{ product.stock }})</span>
+                                        {% else %}
+                                            <span class="badge-out-of-stock small">Out of Stock</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Price & Add to Cart -->
+                                    <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25">
+                                        <span class="fs-4 text-cyan">₹{{ product.price }}</span>
+                                        
+                                        {% if product.in_stock %}
+                                            <form action="{% url 'add_to_cart' product_id=product.id %}" method="POST">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-gradient btn-sm">
+                                                    <i class="bi bi-cart-plus me-1"></i> Add
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <button class="btn btn-secondary btn-sm" disabled>Sold Out</button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="glass-card p-5 text-center my-4">
+                    <i class="bi bi-search fs-1 text-secondary mb-3"></i>
+                    <h4 class="text-white fw-bold">No Products Found</h4>
+                    <p class="text-secondary mb-4">We couldn't find any products matching your selected criteria.</p>
+                    <a href="{% url 'home' %}" class="btn btn-gradient">Browse All Products</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
