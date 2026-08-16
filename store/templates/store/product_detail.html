@@ -5,27 +5,27 @@
 {% block content %}
 <div class="container py-3">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
+    <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-secondary text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'home' %}?category={{ product.category.slug }}" class="text-secondary text-decoration-none">{{ product.category.name }}</a></li>
-            <li class="breadcrumb-item active text-white" aria-current="page">{{ product.name }}</li>
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-primary text-decoration-none fw-medium">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'home' %}?category={{ product.category.slug }}" class="text-primary text-decoration-none fw-medium">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">{{ product.name }}</li>
         </ol>
     </nav>
 
     <!-- Product Details Card -->
-    <div class="glass-card p-4 p-md-5 mb-5">
+    <div class="glass-card p-4 p-md-5 mb-4">
         <div class="row g-4 align-items-center">
             
             <!-- Product Image / Fallback -->
             <div class="col-md-6 text-center">
-                <div class="product-img-box rounded-4 overflow-hidden shadow" style="height: 380px;">
+                <div class="product-img-box rounded-3 overflow-hidden" style="height: 380px; background: #ffffff;">
                     {% if product.image %}
                         <img src="{{ product.image.url }}" alt="{{ product.name }}" style="height: 100%; object-fit: contain;">
                     {% else %}
                         <div class="d-flex flex-column align-items-center justify-content-center h-100 text-secondary">
-                            <i class="bi bi-image fs-1 mb-2"></i>
-                            <span class="fw-semibold fs-5">sweepKart Showcase</span>
+                            <i class="bi bi-box-seam display-1 text-primary mb-2"></i>
+                            <span class="fw-bold fs-5 text-dark">sweepKart Showcase</span>
                         </div>
                     {% endif %}
                 </div>
@@ -33,14 +33,14 @@
 
             <!-- Product Specs & Purchase Form -->
             <div class="col-md-6">
-                <span class="badge bg-primary bg-opacity-25 text-primary mb-2 px-3 py-2 border border-primary border-opacity-25">
+                <span class="badge bg-primary text-white mb-2 px-3 py-2">
                     {{ product.category.name }}
                 </span>
                 
-                <h1 class="display-6 fw-bold text-white mb-3">{{ product.name }}</h1>
+                <h1 class="display-6 fw-bold text-dark mb-3">{{ product.name }}</h1>
                 
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <span class="fs-2 text-cyan">₹{{ product.price }}</span>
+                    <span class="product-price-large">₹{{ product.price }}</span>
                     {% if product.in_stock %}
                         <span class="badge-stock">In Stock ({{ product.stock }} units)</span>
                     {% else %}
@@ -48,7 +48,7 @@
                     {% endif %}
                 </div>
 
-                <p class="text-slate-300 lead fs-6 mb-4">
+                <p class="text-secondary lead fs-6 mb-4">
                     {{ product.description }}
                 </p>
 
@@ -60,23 +60,23 @@
                             <input type="number" name="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
                         </div>
                         <div class="align-self-end flex-grow-1">
-                            <button type="submit" class="btn btn-gradient btn-lg w-100">
-                                <i class="bi bi-cart-plus me-2"></i> Add to Cart
+                            <button type="submit" class="btn btn-gradient btn-lg w-100 py-3 fs-6">
+                                <i class="bi bi-cart-plus-fill me-2"></i> Add to Cart
                             </button>
                         </div>
                     </form>
                 {% else %}
-                    <div class="alert alert-warning glass-card border-warning text-warning mb-0">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> This product is currently out of stock. Check back soon!
+                    <div class="alert alert-warning border-warning text-dark mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i> This product is currently out of stock. Check back soon!
                     </div>
                 {% endif %}
 
                 <!-- Features list -->
-                <div class="mt-4 pt-4 border-top border-secondary border-opacity-25 row g-3 text-secondary small">
-                    <div class="col-6"><i class="bi bi-truck text-primary me-2"></i> Free Express Shipping</div>
-                    <div class="col-6"><i class="bi bi-shield-check text-primary me-2"></i> 1 Year Warranty</div>
-                    <div class="col-6"><i class="bi bi-arrow-counterclockwise text-primary me-2"></i> 7 Days Replacement</div>
-                    <div class="col-6"><i class="bi bi-headset text-primary me-2"></i> 24/7 Support</div>
+                <div class="mt-4 pt-4 border-top row g-3 text-secondary small">
+                    <div class="col-6"><i class="bi bi-truck text-primary fs-5 me-2"></i> Free Express Shipping</div>
+                    <div class="col-6"><i class="bi bi-shield-check text-primary fs-5 me-2"></i> 1 Year Warranty</div>
+                    <div class="col-6"><i class="bi bi-arrow-counterclockwise text-primary fs-5 me-2"></i> 7 Days Replacement</div>
+                    <div class="col-6"><i class="bi bi-headset text-primary fs-5 me-2"></i> 24/7 Support</div>
                 </div>
             </div>
         </div>
@@ -84,21 +84,21 @@
 
     <!-- Related Products -->
     {% if related_products %}
-        <h4 class="fw-bold text-white mb-4"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i> Similar Products</h4>
-        <div class="row row-cols-1 row-cols-md-4 g-4">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i> Similar Products</h5>
+        <div class="row row-cols-1 row-cols-md-4 g-3">
             {% for item in related_products %}
                 <div class="col">
                     <div class="glass-card h-100 p-3">
                         <a href="{% url 'product_detail' slug=item.slug %}" class="text-decoration-none">
-                            <div class="product-img-box rounded-3 mb-3" style="height: 140px;">
+                            <div class="product-img-box rounded-3 mb-2" style="height: 140px; background: #ffffff;">
                                 {% if item.image %}
                                     <img src="{{ item.image.url }}" alt="{{ item.name }}">
                                 {% else %}
                                     <i class="bi bi-box-seam fs-2 text-secondary"></i>
                                 {% endif %}
                             </div>
-                            <h6 class="text-white fw-bold mb-1">{{ item.name }}</h6>
-                            <span class="text-cyan fw-bold">₹{{ item.price }}</span>
+                            <h6 class="text-dark fw-bold mb-1">{{ item.name }}</h6>
+                            <span class="text-dark fw-bold fs-5">₹{{ item.price }}</span>
                         </a>
                     </div>
                 </div>

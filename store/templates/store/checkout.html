@@ -4,13 +4,13 @@
 
 {% block content %}
 <div class="container py-3">
-    <h2 class="fw-bold text-white mb-4"><i class="bi bi-shield-lock-fill text-primary me-2"></i> Order Checkout</h2>
+    <h3 class="fw-bold text-dark mb-4"><i class="bi bi-shield-lock-fill text-primary me-2"></i> Order Checkout</h3>
 
     <div class="row g-4">
         <!-- Shipping Details Form -->
         <div class="col-lg-7">
             <div class="glass-card p-4 p-md-5">
-                <h4 class="fw-bold text-white mb-4">Shipping & Delivery Details</h4>
+                <h4 class="fw-bold text-dark mb-4">Delivery & Shipping Address</h4>
                 
                 <form method="POST" action="{% url 'checkout' %}">
                     {% csrf_token %}
@@ -51,12 +51,12 @@
                         </div>
                     </div>
 
-                    <div class="p-3 mb-4 rounded bg-primary bg-opacity-10 border border-primary border-opacity-25 text-light small">
-                        <i class="bi bi-info-circle me-2 text-primary"></i> Payment Method: <strong>Cash on Delivery / Demo Payment</strong>
+                    <div class="p-3 mb-4 rounded bg-light border border-primary text-dark small">
+                        <i class="bi bi-info-circle-fill me-2 text-primary"></i> Payment Option: <strong>Cash on Delivery (COD) / Pay on Delivery</strong>
                     </div>
 
-                    <button type="submit" class="btn btn-gradient btn-lg w-100 py-3">
-                        <i class="bi bi-check-circle-fill me-2"></i> Place Order Now
+                    <button type="submit" class="btn btn-gradient btn-lg w-100 py-3 font-bold fs-6">
+                        <i class="bi bi-check-circle-fill me-2"></i> CONFIRM & PLACE ORDER
                     </button>
                 </form>
             </div>
@@ -65,35 +65,35 @@
         <!-- Order Items Sidebar -->
         <div class="col-lg-5">
             <div class="glass-card p-4">
-                <h5 class="fw-bold text-white mb-3">Order Items ({{ cart.get_total_items }})</h5>
-                <hr class="border-secondary border-opacity-25">
+                <h5 class="fw-bold text-dark mb-3">Order Summary ({{ cart.get_total_items }} items)</h5>
+                <hr>
 
                 <div class="mb-3" style="max-height: 300px; overflow-y: auto;">
                     {% for item in cart_items %}
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="product-img-box rounded" style="width: 50px; height: 50px; flex-shrink: 0;">
+                                <div class="product-img-box rounded border" style="width: 50px; height: 50px; flex-shrink: 0; background: #ffffff;">
                                     {% if item.product.image %}
                                         <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                                     {% else %}
-                                        <i class="bi bi-box-seam text-secondary"></i>
+                                        <i class="bi bi-box-seam text-primary"></i>
                                     {% endif %}
                                 </div>
                                 <div>
-                                    <div class="text-white fw-semibold small">{{ item.product.name }}</div>
+                                    <div class="text-dark fw-bold small">{{ item.product.name }}</div>
                                     <div class="text-secondary extra-small">{{ item.quantity }} x ₹{{ item.product.price }}</div>
                                 </div>
                             </div>
-                            <span class="text-cyan fw-bold small">₹{{ item.get_cost }}</span>
+                            <span class="text-dark fw-bold small">₹{{ item.get_cost }}</span>
                         </div>
                     {% endfor %}
                 </div>
 
-                <hr class="border-secondary border-opacity-25">
+                <hr>
 
-                <div class="d-flex justify-content-between fs-5 fw-bold text-white">
-                    <span>Grand Total</span>
-                    <span class="text-cyan">₹{{ cart.get_total_price }}</span>
+                <div class="d-flex justify-content-between fs-4 fw-bold text-dark">
+                    <span>Total Amount</span>
+                    <span class="text-primary">₹{{ cart.get_total_price }}</span>
                 </div>
             </div>
         </div>

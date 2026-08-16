@@ -17,12 +17,15 @@
 </head>
 <body>
 
-    <!-- Sticky Glassmorphism Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark glass-nav sticky-top py-3">
+    <!-- Flipkart Signature Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark glass-nav sticky-top py-2">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}">
-                <i class="bi bi-cart-vector text-primary fs-3"></i>
-                <span class="brand-gradient">sweepKart</span>
+            <a class="navbar-brand d-flex flex-column" href="{% url 'home' %}">
+                <div class="d-flex align-items-center gap-1">
+                    <span class="brand-gradient">sweepKart</span>
+                    <i class="bi bi-cart3 text-warning fs-4 ms-1"></i>
+                </div>
+                <span class="brand-subtitle">Explore <span class="text-warning">Plus <i class="bi bi-star-fill small"></i></span></span>
             </a>
             
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
@@ -30,29 +33,29 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarMain">
-                <!-- Search Bar -->
-                <form class="d-flex mx-auto my-2 my-lg-0 col-lg-5" action="{% url 'home' %}" method="GET">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="q" placeholder="Search products, brands, categories..." value="{{ search_query|default:'' }}">
-                        <button class="btn btn-gradient px-3" type="submit">
-                            <i class="bi bi-search"></i>
+                <!-- Flipkart Search Bar -->
+                <form class="d-flex mx-auto my-2 my-lg-0 col-lg-6" action="{% url 'home' %}" method="GET">
+                    <div class="input-group bg-white rounded shadow-sm overflow-hidden">
+                        <input type="text" class="form-control border-0 py-2 px-3" name="q" placeholder="Search for products, brands and more..." value="{{ search_query|default:'' }}" style="background: white !important;">
+                        <button class="btn border-0 text-primary px-3 bg-white" type="submit">
+                            <i class="bi bi-search fs-5"></i>
                         </button>
                     </div>
                 </form>
 
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-3">
                     <li class="nav-item">
-                        <a class="nav-link text-light fw-medium" href="{% url 'home' %}">
-                            <i class="bi bi-grid-fill me-1"></i> Catalog
+                        <a class="nav-link text-white fw-semibold" href="{% url 'home' %}">
+                            <i class="bi bi-grid-3x3-gap-fill me-1"></i> Products
                         </a>
                     </li>
                     
                     <!-- Cart Counter Badge -->
                     <li class="nav-item">
-                        <a class="nav-link text-light fw-medium position-relative pe-3" href="{% url 'cart' %}">
-                            <i class="bi bi-bag-fill me-1 fs-5"></i> Cart
+                        <a class="nav-link text-white fw-semibold position-relative pe-3" href="{% url 'cart' %}">
+                            <i class="bi bi-cart-fill me-1 fs-5"></i> Cart
                             {% if cart_item_count > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark fw-bold">
                                     {{ cart_item_count }}
                                 </span>
                             {% endif %}
@@ -61,25 +64,25 @@
 
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-light fw-semibold d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle fs-5"></i> {{ user.username }}
+                            <a class="nav-link dropdown-toggle text-white fw-bold d-flex align-items-center gap-1 bg-white bg-opacity-10 px-3 py-1 rounded" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle fs-5 me-1"></i> {{ user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark glass-card border-secondary shadow">
+                            <ul class="dropdown-menu dropdown-menu-end glass-card border-0 shadow-lg mt-2">
                                 <li>
-                                    <a class="dropdown-item text-light" href="{% url 'order_history' %}">
-                                        <i class="bi bi-box-seam me-2"></i> My Orders
+                                    <a class="dropdown-item py-2 fw-medium text-dark" href="{% url 'order_history' %}">
+                                        <i class="bi bi-box-seam text-primary me-2"></i> My Orders
                                     </a>
                                 </li>
                                 {% if user.is_staff %}
                                     <li>
-                                        <a class="dropdown-item text-warning" href="/admin/" target="_blank">
+                                        <a class="dropdown-item py-2 fw-medium text-primary" href="/admin/" target="_blank">
                                             <i class="bi bi-speedometer2 me-2"></i> Admin Panel
                                         </a>
                                     </li>
                                 {% endif %}
-                                <li><hr class="dropdown-divider border-secondary"></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                    <a class="dropdown-item py-2 fw-medium text-danger" href="{% url 'logout' %}">
                                         <i class="bi bi-box-arrow-right me-2"></i> Logout
                                     </a>
                                 </li>
@@ -87,10 +90,10 @@
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="btn btn-outline-gradient btn-sm px-3" href="{% url 'login' %}">Log In</a>
+                            <a class="btn btn-light text-primary fw-bold px-4 py-1 rounded-1 shadow-sm" href="{% url 'login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-gradient btn-sm px-3" href="{% url 'register' %}">Sign Up</a>
+                            <a class="btn btn-gradient btn-sm px-3" href="{% url 'register' %}">Become a Seller / Sign Up</a>
                         </li>
                     {% endif %}
                 </ul>

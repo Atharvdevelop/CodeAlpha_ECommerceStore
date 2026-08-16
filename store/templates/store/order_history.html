@@ -4,40 +4,40 @@
 
 {% block content %}
 <div class="container py-3">
-    <h2 class="fw-bold text-white mb-4"><i class="bi bi-box-seam-fill text-primary me-2"></i> Order History</h2>
+    <h3 class="fw-bold text-dark mb-4"><i class="bi bi-box-seam-fill text-primary me-2"></i> My Order History</h3>
 
     {% if orders %}
         <div class="glass-card p-4">
             <div class="table-responsive">
-                <table class="table text-light align-middle">
+                <table class="table align-middle">
                     <thead>
-                        <tr class="text-secondary border-bottom border-secondary border-opacity-25">
+                        <tr class="text-secondary border-bottom">
                             <th>Order ID</th>
                             <th>Date</th>
                             <th>Items Count</th>
                             <th>Total Amount</th>
-                            <th>Status</th>
+                            <th>Fulfillment Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for order in orders %}
-                            <tr class="border-bottom border-secondary border-opacity-10">
-                                <td class="fw-bold text-white">#{{ order.id }}</td>
-                                <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                <td>{{ order.items.count }} item(s)</td>
-                                <td class="text-cyan fw-bold">₹{{ order.total_price }}</td>
+                            <tr class="border-bottom">
+                                <td class="fw-bold text-dark">#{{ order.id }}</td>
+                                <td class="text-secondary">{{ order.created_at|date:"M d, Y" }}</td>
+                                <td class="text-secondary">{{ order.items.count }} item(s)</td>
+                                <td class="text-dark fw-bold fs-6">₹{{ order.total_price }}</td>
                                 <td>
                                     {% if order.status == 'Completed' %}
-                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1">Completed</span>
+                                        <span class="badge bg-success text-white px-2 py-1">Completed</span>
                                     {% elif order.status == 'Shipped' %}
-                                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 px-2 py-1">Shipped</span>
+                                        <span class="badge bg-info text-white px-2 py-1">Shipped</span>
                                     {% elif order.status == 'Processing' %}
-                                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25 px-2 py-1">Processing</span>
+                                        <span class="badge bg-warning text-dark px-2 py-1">Processing</span>
                                     {% elif order.status == 'Cancelled' %}
-                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25 px-2 py-1">Cancelled</span>
+                                        <span class="badge bg-danger text-white px-2 py-1">Cancelled</span>
                                     {% else %}
-                                        <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25 px-2 py-1">Pending</span>
+                                        <span class="badge bg-secondary text-white px-2 py-1">Pending</span>
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
@@ -53,10 +53,10 @@
         </div>
     {% else %}
         <div class="glass-card p-5 text-center my-4 col-md-8 mx-auto">
-            <i class="bi bi-receipt fs-1 text-secondary mb-3"></i>
-            <h4 class="text-white fw-bold">No Past Orders</h4>
-            <p class="text-secondary mb-4">You haven't placed any orders yet on sweepKart.</p>
-            <a href="{% url 'home' %}" class="btn btn-gradient btn-lg">Start Shopping</a>
+            <i class="bi bi-box-seam display-3 text-primary mb-3"></i>
+            <h4 class="text-dark fw-bold">No Past Orders Found</h4>
+            <p class="text-secondary mb-4">You haven't placed any orders on sweepKart yet.</p>
+            <a href="{% url 'home' %}" class="btn btn-gradient btn-lg">Explore Store</a>
         </div>
     {% endif %}
 </div>

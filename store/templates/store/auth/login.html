@@ -8,16 +8,16 @@
         <div class="col-md-6 col-lg-5">
             <div class="glass-card p-4 p-md-5">
                 <div class="text-center mb-4">
-                    <i class="bi bi-person-lock display-4 text-primary mb-2"></i>
-                    <h3 class="fw-bold text-white">Welcome Back</h3>
-                    <p class="text-secondary small">Log in to access your cart, orders, and account</p>
+                    <i class="bi bi-person-circle display-4 text-primary mb-2"></i>
+                    <h3 class="fw-bold text-dark">Customer Login</h3>
+                    <p class="text-secondary small">Get access to your Orders, Wishlist and Recommendations</p>
                 </div>
 
                 <form method="POST">
                     {% csrf_token %}
                     
                     {% if form.non_field_errors %}
-                        <div class="alert alert-danger glass-card border-danger text-danger small mb-3">
+                        <div class="alert alert-danger border-danger text-danger small mb-3">
                             {{ form.non_field_errors }}
                         </div>
                     {% endif %}
@@ -32,13 +32,13 @@
                         {{ form.password }}
                     </div>
 
-                    <button type="submit" class="btn btn-gradient btn-lg w-100 mb-3">
-                        Log In <i class="bi bi-box-arrow-in-right ms-2"></i>
+                    <button type="submit" class="btn btn-gradient btn-lg w-100 mb-3 py-3 fs-6">
+                        LOGIN <i class="bi bi-box-arrow-in-right ms-2"></i>
                     </button>
                 </form>
 
                 <div class="text-center text-secondary small mt-3">
-                    Don't have an account? <a href="{% url 'register' %}" class="text-primary text-decoration-none fw-semibold">Sign up here</a>
+                    New to sweepKart? <a href="{% url 'register' %}" class="text-primary text-decoration-none fw-bold">Create an account</a>
                 </div>
             </div>
         </div>
