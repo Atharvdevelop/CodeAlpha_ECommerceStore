@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -6,6 +7,8 @@ from django.db import transaction
 from django.db.models import Q
 from .models import Category, Product, Cart, CartItem, Order, OrderItem
 from .forms import RegisterForm, LoginForm, CheckoutForm
+
+logger = logging.getLogger(__name__)
 
 
 def _get_session_key(request):
@@ -114,7 +117,14 @@ def cart_view(request):
 def add_to_cart_view(request, product_id):
     if request.method == 'POST':
         product = get_object_or_404(Product, id=product_id, is_active=True)
-        quantity = int(request.POST.get('quantity', 1))
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+            if quantity <= 0:
+                messages.error(request, "Please enter a valid positive quantity.")
+                return redirect('product_detail', slug=product.slug)
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid quantity provided.")
+            return redirect('product_detail', slug=product.slug)
 
         if quantity > product.stock:
             messages.error(request, f"Sorry, only {product.stock} items in stock for {product.name}.")
@@ -144,7 +154,11 @@ def update_cart_view(request, item_id):
     if request.method == 'POST':
         cart = get_or_create_cart(request)
         cart_item = get_object_or_404(CartItem, id=item_id, cart=cart)
-        quantity = int(request.POST.get('quantity', 1))
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid quantity provided.")
+            return redirect('cart')
 
         if quantity <= 0:
             cart_item.delete()
@@ -184,10 +198,11 @@ def checkout_view(request):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # Check stock for all items
+                    # Lock product rows and verify stock under concurrent conditions
                     for item in cart_items:
-                        if item.quantity > item.product.stock:
-                            raise ValueError(f"Insufficient stock for {item.product.name}. Only {item.product.stock} left.")
+                        product_locked = Product.objects.select_for_update().get(id=item.product.id)
+                        if item.quantity > product_locked.stock:
+                            raise ValueError(f"Insufficient stock for {product_locked.name}. Only {product_locked.stock} remaining.")
 
                     order = form.save(commit=False)
                     order.user = request.user
@@ -196,16 +211,17 @@ def checkout_view(request):
                     order.save()
 
                     for item in cart_items:
+                        product_locked = Product.objects.select_for_update().get(id=item.product.id)
                         OrderItem.objects.create(
                             order=order,
-                            product=item.product,
-                            product_name=item.product.name,
-                            price=item.product.price,
+                            product=product_locked,
+                            product_name=product_locked.name,
+                            price=product_locked.price,
                             quantity=item.quantity
                         )
-                        # Deduct stock
-                        item.product.stock -= item.quantity
-                        item.product.save()
+                        # Deduct stock on locked row
+                        product_locked.stock -= item.quantity
+                        product_locked.save()
 
                     # Clear cart
                     cart_items.delete()
@@ -216,7 +232,8 @@ def checkout_view(request):
             except ValueError as e:
                 messages.error(request, str(e))
             except Exception as e:
-                messages.error(request, f"An error occurred while processing your order: {e}")
+                logger.exception("Unexpected error occurred during checkout processing:")
+                messages.error(request, "An unexpected error occurred while placing your order. Please try again.")
     else:
         initial_data = {
             'full_name': f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
@@ -229,6 +246,8 @@ def checkout_view(request):
         'cart': cart,
         'cart_items': cart_items,
     }
+    return render(request, 'store/checkout.html', context)
+
     return render(request, 'store/checkout.html', context)
 
 
