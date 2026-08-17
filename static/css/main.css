@@ -169,21 +169,24 @@ main {
     transition: background 0.15s ease, color 0.15s ease;
 }
 
-.category-filter-item:hover, .category-filter-item.active {
+.category-filter-item:hover,
+.category-filter-item.active {
     background: #f0f5ff;
     color: var(--fk-blue);
     font-weight: 700;
 }
 
 /* Light Mode Form Inputs (Bootstrap override) */
-.form-control, .form-select {
+.form-control,
+.form-select {
     background-color: #ffffff !important;
     border: 1px solid #c2c2c2 !important;
     color: #212121 !important;
     border-radius: 4px;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     border-color: var(--fk-blue) !important;
     box-shadow: 0 0 0 0.2rem rgba(40, 116, 240, 0.2) !important;
     background-color: #ffffff !important;
@@ -195,12 +198,15 @@ main {
 }
 
 /* Clean Table Overrides */
-.table, .card, .modal-content {
+.table,
+.card,
+.modal-content {
     background-color: #ffffff !important;
     color: var(--text-primary) !important;
 }
 
-.table td, .table th {
+.table td,
+.table th {
     border-color: #f0f0f0 !important;
     color: var(--text-primary) !important;
     vertical-align: middle;
@@ -231,6 +237,7 @@ footer {
     color: #878787;
     border-top: 1px solid #28354a;
 }
+
 footer a {
     color: #ffffff;
 }
