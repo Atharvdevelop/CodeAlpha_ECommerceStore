@@ -41,10 +41,14 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
+                                    <a href="{% url 'download_invoice' order_id=order.id %}" class="btn btn-outline-danger btn-sm me-1" title="Download PDF Invoice">
+                                        <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+                                    </a>
                                     <a href="{% url 'order_confirm' order_id=order.id %}" class="btn btn-outline-gradient btn-sm">
                                         View Details <i class="bi bi-chevron-right ms-1"></i>
                                     </a>
                                 </td>
+
                             </tr>
                         {% endfor %}
                     </tbody>

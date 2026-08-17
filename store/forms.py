@@ -47,3 +47,14 @@ class CheckoutForm(forms.ModelForm):
             'postal_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '400001'}),
             'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'India'}),
         }
+
+
+class ReviewForm(forms.Form):
+    rating = forms.ChoiceField(
+        choices=[(5, '5 Stars ★★★★★'), (4, '4 Stars ★★★★☆'), (3, '3 Stars ★★★☆☆'), (2, '2 Stars ★★☆☆☆'), (1, '1 Star ★☆☆☆☆')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    comment = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Share your experience with this product...'})
+    )
+

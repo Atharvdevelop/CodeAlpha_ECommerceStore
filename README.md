@@ -7,28 +7,29 @@
 ## Key Features
 
 ### 🛒 Customer Storefront
-- **Responsive Dark Theme UI**: Custom CSS glassmorphism cards, glowing indigo gradients, and cyan price highlights.
+- **Flipkart-Inspired Modern Light UI**: Clean white product cards, blue header banner, yellow star rating badges, and orange primary action buttons.
+- **Product Reviews & Star Rating System**: Verified buyer review cards, star ratings (1–5 ★), average rating calculations, and interactive customer review submission.
+- **AJAX Cart & Floating Toast Notifications**: Asynchronous add-to-cart fetch submissions (`fetch('/cart/add/...')`), floating glassmorphic toast notification in bottom-right corner ("✓ Added to cart!"), and animated navbar cart badge counter bounce.
+- **Downloadable PDF Invoices**: Instant ReportLab PDF tax invoice generation for completed orders with tabular itemized breakdown, shipping info, and order timestamp.
 - **Product Browsing & Search**: Real-time category filtering, search keyword query, and price range filtering.
-- **Product Details & Stock Badges**: Detailed views with stock availability badges, high-res images, and SVG fallback placeholders.
 - **Shopping Cart System**: Session-based cart that automatically merges with user account upon login.
-- **Atomic Checkout & Order Confirmation**: Transactional checkout that validates stock limits, decrements inventory, and generates order invoices.
+- **Atomic Checkout & Order Confirmation**: Transactional checkout with row-locking (`select_for_update()`) that validates stock limits, decrements inventory, and records order invoices.
 - **Order History**: User dashboard tracking past order status (`Pending`, `Processing`, `Shipped`, `Completed`, `Cancelled`).
-- **User Authentication**: Built-in Django authentication (`UserCreationForm`, `AuthenticationForm`).
 
 ### ⚙️ Admin Management Portal
 - **Inventory & Stock CRUD**: Inline price and stock editing (`list_editable`), active status toggles, and auto-generated slug fields.
-- **Category Management**: Organized product categorization with product counts.
+- **Category & Review Management**: Product category management and moderation of customer reviews.
 - **Order Lifecycle Fulfillment**: Update order statuses and inspect inline order items (`OrderItemInline`).
-- **Advanced Filtering**: Search by customer username, order ID, or address; filter products by category and stock availability.
 
 ---
 
 ## Tech Stack
 
 - **Backend**: Python 3.x, Django 6.1
-- **Database**: SQLite3 (with atomic transactions)
+- **PDF Generation**: ReportLab 5.0
+- **Database**: SQLite3 (with atomic transactions & row locking)
 - **Image Processing**: Pillow
-- **Frontend**: HTML5, Bootstrap 5 CDN, Custom Vanilla CSS (`main.css`)
+- **Frontend**: HTML5, Bootstrap 5 CDN, Custom Vanilla CSS (`main.css`), Vanilla JS (`main.js`)
 - **Icons & Typography**: Bootstrap Icons, Inter Font (Google Fonts)
 
 ---

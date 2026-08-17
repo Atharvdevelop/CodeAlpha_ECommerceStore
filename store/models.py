@@ -46,6 +46,18 @@ class Product(models.Model):
     def in_stock(self):
         return self.stock > 0
 
+    @property
+    def average_rating(self):
+        reviews = self.reviews.all()
+        if reviews.exists():
+            return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+        return 4.5  # default baseline rating
+
+    @property
+    def review_count(self):
+        return self.reviews.count()
+
+
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='cart')
@@ -123,4 +135,27 @@ class OrderItem(models.Model):
     @property
     def get_cost(self):
         return self.price * self.quantity
+
+
+class Review(models.Model):
+    RATING_CHOICES = (
+        (5, '5 Stars - Excellent'),
+        (4, '4 Stars - Very Good'),
+        (3, '3 Stars - Average'),
+        (2, '2 Stars - Poor'),
+        (1, '1 Star - Terrible'),
+    )
+
+    product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField(choices=RATING_CHOICES, default=5)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} ({self.rating}★) for {self.product.name}"
+
 

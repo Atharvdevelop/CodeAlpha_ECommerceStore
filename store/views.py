@@ -1,12 +1,20 @@
 import logging
+from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse, HttpResponse
 from django.db import transaction
 from django.db.models import Q
-from .models import Category, Product, Cart, CartItem, Order, OrderItem
-from .forms import RegisterForm, LoginForm, CheckoutForm
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+from .models import Category, Product, Cart, CartItem, Order, OrderItem, Review
+from .forms import RegisterForm, LoginForm, CheckoutForm, ReviewForm
 
 logger = logging.getLogger(__name__)
 
@@ -97,11 +105,35 @@ def home_view(request):
 def product_detail_view(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
     related_products = Product.objects.filter(category=product.category, is_active=True).exclude(id=product.id)[:4]
+    reviews = product.reviews.all().select_related('user')
+    review_form = ReviewForm()
+
     context = {
         'product': product,
         'related_products': related_products,
+        'reviews': reviews,
+        'review_form': review_form,
     }
     return render(request, 'store/product_detail.html', context)
+
+
+@login_required
+def add_review_view(request, product_id):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            Review.objects.create(
+                product=product,
+                user=request.user,
+                rating=int(form.cleaned_data['rating']),
+                comment=form.cleaned_data['comment']
+            )
+            messages.success(request, "Thank you! Your product review has been posted.")
+        else:
+            messages.error(request, "Please enter a valid review comment.")
+        return redirect('product_detail', slug=product.slug)
+    return redirect('home')
 
 
 def cart_view(request):
@@ -120,13 +152,19 @@ def add_to_cart_view(request, product_id):
         try:
             quantity = int(request.POST.get('quantity', 1))
             if quantity <= 0:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                    return JsonResponse({'success': False, 'message': 'Please enter a valid positive quantity.'}, status=400)
                 messages.error(request, "Please enter a valid positive quantity.")
                 return redirect('product_detail', slug=product.slug)
         except (ValueError, TypeError):
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return JsonResponse({'success': False, 'message': 'Invalid quantity provided.'}, status=400)
             messages.error(request, "Invalid quantity provided.")
             return redirect('product_detail', slug=product.slug)
 
         if quantity > product.stock:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return JsonResponse({'success': False, 'message': f'Only {product.stock} left in stock.'}, status=400)
             messages.error(request, f"Sorry, only {product.stock} items in stock for {product.name}.")
             return redirect('product_detail', slug=product.slug)
 
@@ -139,10 +177,21 @@ def add_to_cart_view(request, product_id):
 
         if not created:
             if (cart_item.quantity + quantity) > product.stock:
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                    return JsonResponse({'success': False, 'message': f'Cannot add more. Stock limit of {product.stock} reached.'}, status=400)
                 messages.warning(request, f"Cannot add more. Stock limit of {product.stock} reached.")
                 return redirect('cart')
             cart_item.quantity += quantity
             cart_item.save()
+
+        # Check for AJAX request
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', '')
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'cart_item_count': cart.get_total_items,
+                'message': f'✓ Added {product.name} to cart!'
+            })
 
         messages.success(request, f"Added {product.name} to your cart!")
         return redirect('cart')
@@ -248,8 +297,6 @@ def checkout_view(request):
     }
     return render(request, 'store/checkout.html', context)
 
-    return render(request, 'store/checkout.html', context)
-
 
 @login_required
 def order_confirm_view(request, order_id):
@@ -268,6 +315,63 @@ def order_history_view(request):
         'orders': orders,
     }
     return render(request, 'store/order_history.html', context)
+
+
+@login_required
+def download_invoice_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
+    story = []
+    styles = getSampleStyleSheet()
+
+    # Title / Header
+    title_style = ParagraphStyle(
+        'InvoiceTitle',
+        parent=styles['Heading1'],
+        fontSize=22,
+        textColor=colors.HexColor('#2874f0'),
+        spaceAfter=12
+    )
+    story.append(Paragraph("sweepKart — Official Tax Invoice", title_style))
+    story.append(Paragraph(f"<b>Order Reference:</b> #{order.id} | <b>Date:</b> {order.created_at.strftime('%B %d, %Y - %H:%M')}", styles['Normal']))
+    story.append(Spacer(1, 14))
+
+    # Customer Details
+    cust_info = f"<b>Shipping Address:</b><br/><b>{order.full_name}</b><br/>{order.address}<br/>{order.city}, {order.postal_code}, {order.country}<br/>Email: {order.email}"
+    story.append(Paragraph(cust_info, styles['Normal']))
+    story.append(Spacer(1, 16))
+
+    # Items Table
+    data = [["Product Description", "Unit Price", "Qty", "Total Amount"]]
+    for item in order.items.all():
+        data.append([item.product_name, f"Rs. {item.price}", str(item.quantity), f"Rs. {item.get_cost}"])
+
+    data.append(["", "", "Grand Total:", f"Rs. {order.total_price}"])
+
+    t = Table(data, colWidths=[240, 90, 60, 110])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2874f0')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('BACKGROUND', (0, 1), (-1, -2), colors.HexColor('#f8fafc')),
+        ('GRID', (0, 0), (-1, -2), 0.5, colors.HexColor('#e0e0e0')),
+        ('FONTNAME', (2, -1), (-1, -1), 'Helvetica-Bold'),
+        ('TEXTCOLOR', (3, -1), (3, -1), colors.HexColor('#2874f0')),
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 20))
+    story.append(Paragraph("Thank you for shopping with sweepKart! For support, contact support@sweepkart.com.", styles['Italic']))
+
+    doc.build(story)
+    buffer.seek(0)
+
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="sweepKart_Invoice_Order_{order.id}.pdf"'
+    return response
 
 
 def register_view(request):
@@ -309,4 +413,3 @@ def logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out.")
     return redirect('home')
-

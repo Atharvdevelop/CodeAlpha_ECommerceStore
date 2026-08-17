@@ -77,3 +77,42 @@ class StoreViewTests(TestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock, 3)
 
+    def test_ajax_add_to_cart(self):
+        response = self.client.post(
+            reverse('add_to_cart', args=[self.product.id]),
+            {'quantity': 1},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(response.status_code, 200)
+        json_data = response.json()
+        self.assertTrue(json_data['success'])
+        self.assertEqual(json_data['cart_item_count'], 1)
+
+    def test_review_submission(self):
+        self.client.login(username="testuser", password="password123")
+        review_data = {
+            'rating': 5,
+            'comment': 'Awesome laptop stand!'
+        }
+        response = self.client.post(reverse('add_review', args=[self.product.id]), review_data)
+        self.assertRedirects(response, reverse('product_detail', args=[self.product.slug]))
+        self.assertEqual(self.product.reviews.count(), 1)
+
+    def test_download_pdf_invoice(self):
+        self.client.login(username="testuser", password="password123")
+        order = Order.objects.create(
+            user=self.user,
+            full_name="Test User",
+            email="test@example.com",
+            address="123 Test St",
+            city="Test City",
+            postal_code="123456",
+            total_price=999.00
+        )
+        OrderItem.objects.create(order=order, product=self.product, product_name=self.product.name, price=999.00, quantity=1)
+
+        response = self.client.get(reverse('download_invoice', args=[order.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/pdf')
+
+
