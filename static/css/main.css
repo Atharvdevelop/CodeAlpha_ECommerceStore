@@ -1,262 +1,490 @@
-/* sweepKart - Modern E-Commerce Light Theme (Flipkart Inspired) */
+/* sweepKart - Futuristic Glassmorphism Dark Theme & Layout Architecture */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --fk-blue: #2874f0;
-    --fk-blue-dark: #1b5cc4;
-    --fk-orange: #fb641b;
-    --fk-yellow: #ffe500;
-    --bg-light: #f1f2f4;
-    --card-bg: #ffffff;
-    --border-color: #e0e0e0;
-    --text-primary: #212121;
-    --text-secondary: #878787;
-    --price-green: #388e3c;
+    --bg-navy: #0a0f1e;
+    --bg-navy-light: #111827;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-nav-bg: rgba(15, 23, 42, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-hover: rgba(34, 211, 238, 0.3);
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --accent-cyan: #22d3ee;
+    --accent-cyan-glow: rgba(34, 211, 238, 0.2);
+    --accent-indigo: #6366f1;
+    --accent-purple: #a855f7;
+    --gradient-btn: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    --gradient-btn-hover: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+    --gradient-card-hero: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+}
+
+/* Global Reset & Ambient Radial Light */
+* {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-light);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-navy);
     color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    margin: 0;
+    position: relative;
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.05) 0%, transparent 60%);
+    background-attachment: fixed;
 }
 
 main {
     flex: 1;
+    position: relative;
+    z-index: 1;
 }
 
-/* Flipkart Blue Navbar */
-.glass-nav {
-    background: var(--fk-blue) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+/* Typography & Colors */
+.text-cyan-bright {
+    color: var(--accent-cyan) !important;
+    text-shadow: 0 0 12px var(--accent-cyan-glow);
 }
 
-.brand-gradient {
-    color: #ffffff !important;
-    font-weight: 800;
-    font-size: 1.6rem;
-    letter-spacing: -0.5px;
-    font-style: italic;
+.text-gradient-purple {
+    background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.brand-subtitle {
-    color: var(--fk-yellow);
-    font-size: 0.75rem;
-    font-weight: 600;
-    font-style: italic;
-    margin-top: -4px;
-}
-
-/* Flipkart-style Product Card */
+/* Glassmorphism System */
 .glass-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    overflow: hidden;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.12);
-    border-color: #bbd4fb;
+.glass-card-hover:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: 0 12px 40px 0 rgba(34, 211, 238, 0.15);
+}
+
+/* Sticky Glassmorphic Navbar with Z-INDEX 50 */
+.glass-nav {
+    background: var(--glass-nav-bg) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 50 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Megamenu Dropdown Styling with CSS Isolation */
+.megamenu-dropdown-container {
+    position: relative;
+}
+
+.megamenu-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 50 !important;
+    width: 260px;
+    background: var(--bg-navy-light);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    isolation: isolate;
+}
+
+.megamenu-dropdown-container:hover .megamenu-menu,
+.megamenu-dropdown-container:focus-within .megamenu-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.megamenu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.megamenu-item:hover {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--accent-cyan);
+    transform: translateX(4px);
+}
+
+/* Live Search Floating Box (Z-INDEX 60) */
+.search-container {
+    position: relative;
+}
+
+.search-input {
+    background: rgba(15, 23, 42, 0.7) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: #ffffff !important;
+    border-radius: 12px;
+    padding-left: 1rem;
+    transition: all 0.25s ease;
+}
+
+.search-input:focus {
+    border-color: var(--accent-cyan) !important;
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15) !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+
+.search-input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.search-suggestions-overlay {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 60 !important;
+    background: var(--bg-navy-light);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+    display: none;
+}
+
+.search-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s ease;
+}
+
+.search-suggestion-item:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+.search-suggestion-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 2px;
+}
+
+/* Product Catalog Grid Layout */
+.product-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Product Card Isolation & Elements */
+.product-card-wrapper {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+    border-radius: 16px;
+}
+
+.product-card-wrapper:hover {
+    z-index: 10;
+}
+
+.product-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 16px 32px rgba(34, 211, 238, 0.12), 0 0 20px rgba(99, 102, 241, 0.15);
+}
+
+.product-card-img-box {
+    width: 100%;
+    height: 220px;
+    background: rgba(255, 255, 255, 0.03);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.product-card-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 1.2rem;
+    transition: transform 0.4s ease;
+}
+
+.product-card:hover .product-card-img-box img {
+    transform: scale(1.08);
+}
+
+/* Floating Wishlist Heart Button (Z-INDEX 20) */
+.wishlist-btn-floating {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 20 !important;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.wishlist-btn-floating:hover,
+.wishlist-btn-floating.active {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+/* Swatch Dots (Color Hex Circles) */
+.color-dot-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.color-dot-swatch:hover,
+.color-dot-swatch.active {
+    transform: scale(1.25);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+/* Interactive Color & Size Selector Chips in Product Details */
+.swatch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1.5px solid var(--glass-border);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.swatch-btn:hover,
+.swatch-btn.active {
+    border-color: var(--accent-cyan);
+    background: rgba(34, 211, 238, 0.12);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+}
+
+.size-chip {
+    min-width: 44px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1.5px solid var(--glass-border);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.size-chip:hover,
+.size-chip.active {
+    background: var(--accent-indigo);
+    border-color: var(--accent-indigo);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Gradient Buttons */
+.btn-gradient {
+    background: var(--gradient-btn) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700;
+    padding: 0.65rem 1.4rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+    transition: all 0.25s ease;
+}
+
+.btn-gradient:hover {
+    background: var(--gradient-btn-hover) !important;
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.45);
+    transform: translateY(-2px);
+}
+
+.btn-outline-gradient {
+    background: rgba(15, 23, 42, 0.5) !important;
+    color: var(--accent-cyan) !important;
+    border: 1.5px solid var(--accent-cyan) !important;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 0.6rem 1.35rem;
+    transition: all 0.25s ease;
+}
+
+.btn-outline-gradient:hover {
+    background: rgba(34, 211, 238, 0.15) !important;
+    box-shadow: 0 0 16px var(--accent-cyan-glow);
+    transform: translateY(-2px);
+}
+
+/* Form Inputs & Controls Dark Overrides */
+.form-control,
+.form-select {
+    background-color: rgba(15, 23, 42, 0.7) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-primary) !important;
+    border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent-cyan) !important;
+    box-shadow: 0 0 0 0.2rem rgba(34, 211, 238, 0.2) !important;
+    background-color: rgba(15, 23, 42, 0.9) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Table Dark Styling */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-primary);
+    border-color: var(--glass-border) !important;
+}
+
+.table th {
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.table td {
+    border-color: var(--glass-border);
+}
+
+/* Badges */
+.badge-stock {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    padding: 0.35em 0.7em;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.badge-out-of-stock {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    padding: 0.35em 0.7em;
+    border-radius: 6px;
+    font-weight: 600;
 }
 
 /* Hero Section Banner */
 .hero-banner {
-    background: linear-gradient(135deg, #2874f0 0%, #6366f1 100%);
-    border-radius: 12px;
-    padding: 3.5rem 2rem;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 3.5rem 2.5rem;
     position: relative;
     overflow: hidden;
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(40, 116, 240, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .hero-banner::before {
     content: '';
     position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 250px;
-    height: 250px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, transparent 70%);
     border-radius: 50%;
 }
 
-/* Custom Flipkart Action Buttons */
-.btn-gradient {
-    background: var(--fk-orange);
-    color: #ffffff !important;
-    border: none;
-    font-weight: 700;
-    padding: 0.6rem 1.4rem;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
-}
-
-.btn-gradient:hover {
-    background: #e55613;
-    box-shadow: 0 4px 8px 0 rgba(251, 100, 27, 0.3);
-    transform: translateY(-1px);
-}
-
-.btn-outline-gradient {
-    background: #ffffff;
-    color: var(--fk-blue) !important;
-    border: 1.5px solid var(--fk-blue);
-    border-radius: 6px;
-    font-weight: 600;
-    padding: 0.55rem 1.35rem;
-    transition: all 0.2s ease;
-}
-
-.btn-outline-gradient:hover {
-    background: #f0f5ff;
-    border-color: var(--fk-blue-dark);
-}
-
-/* Price & Discount Highlights */
-.text-cyan {
-    color: var(--text-primary) !important;
-    font-weight: 800;
-}
-
-.product-price-large {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #111827;
-}
-
-/* Product Image Showcase Box */
-.product-img-box {
-    width: 100%;
-    height: 220px;
-    background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-    border-bottom: 1px solid #f1f5f9;
-}
-
-.product-img-box img {
-    width: 100%;
-    height: 220px;
-    object-fit: contain;
-    padding: 1rem;
-    transition: transform 0.3s ease;
-}
-
-.glass-card:hover .product-img-box img {
-    transform: scale(1.05);
-}
-
-/* Category Sidebar Filter List */
-.category-filter-item {
-    color: #424242;
-    text-decoration: none;
-    display: block;
-    padding: 0.6rem 0.9rem;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.category-filter-item:hover,
-.category-filter-item.active {
-    background: #f0f5ff;
-    color: var(--fk-blue);
-    font-weight: 700;
-}
-
-/* Light Mode Form Inputs (Bootstrap override) */
-.form-control,
-.form-select {
-    background-color: #ffffff !important;
-    border: 1px solid #c2c2c2 !important;
-    color: #212121 !important;
-    border-radius: 4px;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: var(--fk-blue) !important;
-    box-shadow: 0 0 0 0.2rem rgba(40, 116, 240, 0.2) !important;
-    background-color: #ffffff !important;
-    color: #212121 !important;
-}
-
-.form-control::placeholder {
-    color: #878787 !important;
-}
-
-/* Clean Table Overrides */
-.table,
-.card,
-.modal-content {
-    background-color: #ffffff !important;
-    color: var(--text-primary) !important;
-}
-
-.table td,
-.table th {
-    border-color: #f0f0f0 !important;
-    color: var(--text-primary) !important;
-    vertical-align: middle;
-}
-
-/* Stock & Status Badges */
-.badge-stock {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-    padding: 0.35em 0.7em;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-.badge-out-of-stock {
-    background: #ffebee;
-    color: #c62828;
-    border: 1px solid #ffcdd2;
-    padding: 0.35em 0.7em;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-/* Modern Light Footer */
+/* Footer Dark */
 footer {
-    background: #172337;
-    color: #878787;
-    border-top: 1px solid #28354a;
+    background: rgba(15, 23, 42, 0.95);
+    border-top: 1px solid var(--glass-border);
+    color: var(--text-muted);
 }
 
 footer a {
-    color: #ffffff;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
-/* Navbar Badge Bounce Animation */
-@keyframes badgeBounce {
-    0% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.4); }
-    100% { transform: translate(-50%, -50%) scale(1); }
-}
-
-.cart-badge-bounce {
-    animation: badgeBounce 0.5s ease-in-out;
-}
-
-/* Floating Glassmorphic Toast */
-.glass-toast {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+footer a:hover {
+    color: var(--accent-cyan);
 }

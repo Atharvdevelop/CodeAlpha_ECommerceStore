@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container py-3">
-    <h3 class="fw-bold text-dark mb-4"><i class="bi bi-cart-check-fill text-primary me-2"></i> My Shopping Cart</h3>
+    <h3 class="fw-bold text-white mb-4"><i class="bi bi-cart-check-fill text-cyan-bright me-2"></i> My Shopping Cart</h3>
 
     {% if cart_items %}
         <div class="row g-4">
@@ -15,45 +15,53 @@
                     <div class="table-responsive">
                         <table class="table align-middle">
                             <thead>
-                                <tr class="text-secondary border-bottom">
-                                    <th>Product</th>
-                                    <th>Price</th>
-                                    <th style="width: 140px;">Quantity</th>
+                                <tr class="text-secondary border-bottom border-secondary border-opacity-25">
+                                    <th>Item</th>
+                                    <th>Unit Price</th>
+                                    <th style="width: 130px;">Qty</th>
                                     <th class="text-end">Subtotal</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for item in cart_items %}
-                                    <tr class="border-bottom">
+                                    <tr class="border-bottom border-secondary border-opacity-25">
                                         <td>
                                             <div class="d-flex align-items-center gap-3">
-                                                <div class="product-img-box rounded border" style="width: 60px; height: 60px; flex-shrink: 0; background: #ffffff;">
-                                                    {% if item.product.image %}
+                                                <div class="product-card-img-box rounded border border-secondary border-opacity-25" style="width: 60px; height: 60px; flex-shrink: 0; background: rgba(15, 23, 42, 0.5);">
+                                                    {% if item.variant and item.variant.variant_image %}
+                                                        <img src="{{ item.variant.variant_image.url }}" alt="{{ item.product.name }}">
+                                                    {% elif item.product.image %}
                                                         <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
                                                     {% else %}
-                                                        <i class="bi bi-box-seam text-primary"></i>
+                                                        <i class="bi bi-box-seam text-cyan-bright"></i>
                                                     {% endif %}
                                                 </div>
                                                 <div>
-                                                    <a href="{% url 'product_detail' slug=item.product.slug %}" class="text-dark fw-bold text-decoration-none">
+                                                    <a href="{% url 'product_detail' slug=item.product.slug %}" class="text-white fw-bold text-decoration-none hover-cyan">
                                                         {{ item.product.name }}
                                                     </a>
-                                                    <div class="small text-secondary">{{ item.product.category.name }}</div>
+                                                    {% if item.variant %}
+                                                        <div class="small text-cyan-bright">
+                                                            Variant: {{ item.variant.color_name }} {% if item.variant.size %}— Size {{ item.variant.size }}{% endif %}
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="small text-muted">{{ item.product.category.name }}</div>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="fw-bold text-dark">₹{{ item.product.price }}</td>
+                                        <td class="fw-bold text-white">₹{{ item.unit_price }}</td>
                                         <td>
                                             <form action="{% url 'update_cart' item_id=item.id %}" method="POST" class="d-flex align-items-center gap-1">
                                                 {% csrf_token %}
-                                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="form-control form-control-sm text-center">
-                                                <button type="submit" class="btn btn-outline-primary btn-sm" title="Update Quantity">
+                                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{% if item.variant %}{{ item.variant.stock }}{% else %}{{ item.product.stock }}{% endif %}" class="form-control form-control-sm text-center">
+                                                <button type="submit" class="btn btn-outline-cyan btn-sm p-1 text-cyan-bright border-secondary border-opacity-25" title="Update Quantity">
                                                     <i class="bi bi-check-lg"></i>
                                                 </button>
                                             </form>
                                         </td>
-                                        <td class="text-end text-dark fw-bold fs-5">₹{{ item.get_cost }}</td>
+                                        <td class="text-end text-cyan-bright fw-bold fs-5">₹{{ item.get_cost }}</td>
                                         <td class="text-center">
                                             <form action="{% url 'remove_from_cart' item_id=item.id %}" method="POST">
                                                 {% csrf_token %}
@@ -73,31 +81,31 @@
             <!-- Order Summary Card -->
             <div class="col-lg-4">
                 <div class="glass-card p-4">
-                    <h5 class="fw-bold text-dark mb-3">Price Details</h5>
-                    <hr>
+                    <h5 class="fw-bold text-white mb-3">Order Summary</h5>
+                    <hr class="border-secondary opacity-25">
                     
                     <div class="d-flex justify-content-between text-secondary mb-2">
-                        <span>Price ({{ cart.get_total_items }} items)</span>
-                        <span class="text-dark fw-semibold">₹{{ cart.get_total_price }}</span>
+                        <span>Items Total ({{ cart.get_total_items }})</span>
+                        <span class="text-white fw-semibold">₹{{ cart.get_total_price }}</span>
                     </div>
                     <div class="d-flex justify-content-between text-secondary mb-2">
-                        <span>Delivery Charges</span>
+                        <span>Express Delivery</span>
                         <span class="text-success fw-bold">FREE</span>
                     </div>
                     <div class="d-flex justify-content-between text-secondary mb-3">
-                        <span>Taxes & Fees</span>
-                        <span class="text-dark fw-semibold">Included</span>
+                        <span>Taxes & Processing</span>
+                        <span class="text-white fw-semibold">Included</span>
                     </div>
 
-                    <hr>
+                    <hr class="border-secondary opacity-25">
                     
-                    <div class="d-flex justify-content-between fs-4 fw-bold text-dark mb-4">
-                        <span>Total Amount</span>
-                        <span class="text-primary">₹{{ cart.get_total_price }}</span>
+                    <div class="d-flex justify-content-between fs-4 fw-bold text-white mb-4">
+                        <span>Total Pay</span>
+                        <span class="text-cyan-bright">₹{{ cart.get_total_price }}</span>
                     </div>
 
                     <a href="{% url 'checkout' %}" class="btn btn-gradient btn-lg w-100 mb-3 py-3 fs-6">
-                        <i class="bi bi-shield-lock-fill me-2"></i> PLACE ORDER
+                        <i class="bi bi-shield-lock-fill me-2"></i> PROCEED TO CHECKOUT
                     </a>
 
                     <a href="{% url 'home' %}" class="btn btn-outline-gradient w-100 fw-bold">
@@ -108,8 +116,8 @@
         </div>
     {% else %}
         <div class="glass-card p-5 text-center my-4 col-md-8 mx-auto">
-            <i class="bi bi-cart-x fs-1 text-primary mb-3"></i>
-            <h4 class="text-dark fw-bold">Your Cart is Currently Empty</h4>
+            <i class="bi bi-cart-x display-3 text-muted mb-3"></i>
+            <h4 class="text-white fw-bold">Your Cart is Currently Empty</h4>
             <p class="text-secondary mb-4">Explore our wide selection of products and add items to your cart.</p>
             <a href="{% url 'home' %}" class="btn btn-gradient btn-lg">Explore Store</a>
         </div>

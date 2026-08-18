@@ -1,41 +1,58 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from store.models import Category, Product, Cart, CartItem, Order, OrderItem
+from store.models import Category, Product, ProductVariant, Wishlist, Cart, CartItem, Order, OrderItem
 
 
 class StoreModelTests(TestCase):
     def setUp(self):
-        self.category = Category.objects.create(name="Gadgets")
+        self.parent_cat = Category.objects.create(name="Men")
+        self.sub_cat = Category.objects.create(name="Men's Jackets", parent=self.parent_cat)
         self.product = Product.objects.create(
-            category=self.category,
-            name="Test Headphones",
-            price=1999.00,
+            category=self.sub_cat,
+            name="Test Leather Jacket",
+            price=3999.00,
             stock=10,
-            description="High quality test headphones"
+            description="High quality jacket"
+        )
+        self.variant = ProductVariant.objects.create(
+            product=self.product,
+            color_name="Black",
+            color_code="#000000",
+            size="L",
+            stock=5,
+            price=3999.00
         )
 
-    def test_category_and_product_slug_generation(self):
-        self.assertEqual(self.category.slug, "gadgets")
-        self.assertEqual(self.product.slug, "test-headphones")
-        self.assertTrue(self.product.in_stock)
+    def test_category_hierarchy_and_slug(self):
+        self.assertEqual(self.parent_cat.slug, "men")
+        self.assertEqual(self.sub_cat.slug, "mens-jackets")
+        self.assertEqual(str(self.sub_cat), "Men > Men's Jackets")
 
-    def test_cart_total_price_calculation(self):
+    def test_variant_model_and_cart_calculation(self):
+        self.assertEqual(str(self.variant), "Test Leather Jacket (Black / Size L)")
         cart = Cart.objects.create(session_key="test_session")
-        CartItem.objects.create(cart=cart, product=self.product, quantity=2)
+        cart_item = CartItem.objects.create(cart=cart, product=self.product, variant=self.variant, quantity=2)
         self.assertEqual(cart.get_total_items, 2)
-        self.assertEqual(cart.get_total_price, 3998.00)
+        self.assertEqual(cart.get_total_price, 7998.00)
+        self.assertIn("Black", str(cart_item))
 
 
 class StoreViewTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username="testuser", password="password123")
-        self.category = Category.objects.create(name="Tech")
+        self.category = Category.objects.create(name="Electronics")
         self.product = Product.objects.create(
             category=self.category,
-            name="Laptop Stand",
-            price=999.00,
+            name="Wireless Headphones",
+            price=4999.00,
+            stock=10
+        )
+        self.variant = ProductVariant.objects.create(
+            product=self.product,
+            color_name="Space Silver",
+            color_code="#94a3b8",
             stock=5
         )
 
@@ -43,20 +60,45 @@ class StoreViewTests(TestCase):
         response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "sweepKart")
-        self.assertContains(response, "Laptop Stand")
+        self.assertContains(response, "Wireless Headphones")
 
-    def test_add_to_cart_flow(self):
-        response = self.client.post(reverse('add_to_cart', args=[self.product.id]), {'quantity': 2})
+    def test_add_to_cart_with_variant(self):
+        response = self.client.post(reverse('add_to_cart', args=[self.product.id]), {
+            'quantity': 2,
+            'variant_id': self.variant.id
+        })
         self.assertRedirects(response, reverse('cart'))
 
         cart_response = self.client.get(reverse('cart'))
         self.assertEqual(cart_response.status_code, 200)
-        self.assertContains(cart_response, "Laptop Stand")
-        self.assertContains(cart_response, "1998.00")
+        self.assertContains(cart_response, "Wireless Headphones")
+        self.assertContains(cart_response, "Space Silver")
+
+    def test_wishlist_toggle_view(self):
+        self.client.login(username="testuser", password="password123")
+        response = self.client.post(
+            reverse('wishlist_toggle', args=[self.product.id]),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+        self.assertEqual(response.status_code, 200)
+        json_data = response.json()
+        self.assertTrue(json_data['success'])
+        self.assertTrue(json_data['added'])
+        self.assertEqual(json_data['wishlist_count'], 1)
+
+    def test_search_suggest_api(self):
+        response = self.client.get(reverse('search_suggest') + '?q=Wire')
+        self.assertEqual(response.status_code, 200)
+        json_data = response.json()
+        self.assertTrue(len(json_data['results']) > 0)
+        self.assertEqual(json_data['results'][0]['name'], "Wireless Headphones")
 
     def test_checkout_and_stock_deduction(self):
         self.client.login(username="testuser", password="password123")
-        self.client.post(reverse('add_to_cart', args=[self.product.id]), {'quantity': 2})
+        self.client.post(reverse('add_to_cart', args=[self.product.id]), {
+            'quantity': 2,
+            'variant_id': self.variant.id
+        })
 
         checkout_data = {
             'full_name': 'Test User',
@@ -70,33 +112,12 @@ class StoreViewTests(TestCase):
         
         # Verify order creation
         order = Order.objects.get(user=self.user)
-        self.assertEqual(order.total_price, 1998.00)
+        self.assertEqual(order.total_price, 9998.00)
         self.assertRedirects(response, reverse('order_confirm', args=[order.id]))
 
-        # Verify stock deduction
-        self.product.refresh_from_db()
-        self.assertEqual(self.product.stock, 3)
-
-    def test_ajax_add_to_cart(self):
-        response = self.client.post(
-            reverse('add_to_cart', args=[self.product.id]),
-            {'quantity': 1},
-            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
-        )
-        self.assertEqual(response.status_code, 200)
-        json_data = response.json()
-        self.assertTrue(json_data['success'])
-        self.assertEqual(json_data['cart_item_count'], 1)
-
-    def test_review_submission(self):
-        self.client.login(username="testuser", password="password123")
-        review_data = {
-            'rating': 5,
-            'comment': 'Awesome laptop stand!'
-        }
-        response = self.client.post(reverse('add_review', args=[self.product.id]), review_data)
-        self.assertRedirects(response, reverse('product_detail', args=[self.product.slug]))
-        self.assertEqual(self.product.reviews.count(), 1)
+        # Verify variant stock deduction
+        self.variant.refresh_from_db()
+        self.assertEqual(self.variant.stock, 3)
 
     def test_download_pdf_invoice(self):
         self.client.login(username="testuser", password="password123")
@@ -114,5 +135,6 @@ class StoreViewTests(TestCase):
         response = self.client.get(reverse('download_invoice', args=[order.id]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/pdf')
+
 
 

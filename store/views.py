@@ -13,7 +13,7 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-from .models import Category, Product, Cart, CartItem, Order, OrderItem, Review
+from .models import Category, Product, ProductVariant, Wishlist, Cart, CartItem, Order, OrderItem, Review
 from .forms import RegisterForm, LoginForm, CheckoutForm, ReviewForm
 
 logger = logging.getLogger(__name__)
@@ -37,6 +37,7 @@ def get_or_create_cart(request):
                     cart_item, item_created = CartItem.objects.get_or_create(
                         cart=cart,
                         product=item.product,
+                        variant=item.variant,
                         defaults={'quantity': item.quantity}
                     )
                     if not item_created:
@@ -56,17 +57,36 @@ def cart_context_processor(request):
         count = cart.get_total_items
     except Exception:
         count = 0
-    return {'cart_item_count': count}
+
+    wishlist_ids = set()
+    wishlist_count = 0
+    if request.user.is_authenticated:
+        wishlist_ids = set(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
+        wishlist_count = len(wishlist_ids)
+
+    parent_categories = Category.objects.filter(parent__isnull=True).prefetch_related('subcategories')
+
+    return {
+        'cart_item_count': count,
+        'nav_categories': parent_categories,
+        'user_wishlist_ids': wishlist_ids,
+        'wishlist_count': wishlist_count,
+    }
 
 
 def home_view(request):
-    products = Product.objects.filter(is_active=True)
-    categories = Category.objects.all()
+    products = Product.objects.filter(is_active=True).select_related('category', 'category__parent').prefetch_related('variants')
+    categories = Category.objects.all().select_related('parent')
 
-    # Filtering
+    # Category Filtering (supports parent category or specific subcategory)
     selected_category_slug = request.GET.get('category')
+    selected_category = None
     if selected_category_slug:
-        products = products.filter(category__slug=selected_category_slug)
+        selected_category = Category.objects.filter(slug=selected_category_slug).first()
+        if selected_category:
+            products = products.filter(
+                Q(category=selected_category) | Q(category__parent=selected_category)
+            )
 
     # Search
     search_query = request.GET.get('q')
@@ -74,7 +94,8 @@ def home_view(request):
         products = products.filter(
             Q(name__icontains=search_query) |
             Q(description__icontains=search_query) |
-            Q(category__name__icontains=search_query)
+            Q(category__name__icontains=search_query) |
+            Q(category__parent__name__icontains=search_query)
         )
 
     # Price filter
@@ -94,6 +115,7 @@ def home_view(request):
     context = {
         'products': products,
         'categories': categories,
+        'selected_category': selected_category,
         'selected_category_slug': selected_category_slug,
         'search_query': search_query,
         'min_price': min_price,
@@ -102,19 +124,96 @@ def home_view(request):
     return render(request, 'store/home.html', context)
 
 
+def search_suggest_view(request):
+    query = request.GET.get('q', '').strip()
+    if not query or len(query) < 2:
+        return JsonResponse({'results': []})
+
+    products = Product.objects.filter(is_active=True).filter(
+        Q(name__icontains=query) | Q(category__name__icontains=query) | Q(category__parent__name__icontains=query)
+    ).select_related('category')[:6]
+
+    results = []
+    for p in products:
+        results.append({
+            'id': p.id,
+            'name': p.name,
+            'price': str(p.price),
+            'slug': p.slug,
+            'category': p.category.name,
+            'image_url': p.image.url if p.image else '',
+        })
+
+    return JsonResponse({'results': results})
+
+
 def product_detail_view(request, slug):
-    product = get_object_or_404(Product, slug=slug, is_active=True)
-    related_products = Product.objects.filter(category=product.category, is_active=True).exclude(id=product.id)[:4]
-    reviews = product.reviews.all().select_related('user')
+    product = get_object_or_404(Product.objects.prefetch_related('variants', 'reviews__user'), slug=slug, is_active=True)
+    related_products = Product.objects.filter(category=product.category, is_active=True).exclude(id=product.id).prefetch_related('variants')[:4]
+    reviews = product.reviews.all()
     review_form = ReviewForm()
+
+    variants = list(product.variants.all())
+    variants_data = []
+    for v in variants:
+        variants_data.append({
+            'id': v.id,
+            'color_name': v.color_name,
+            'color_code': v.color_code,
+            'size': v.size,
+            'stock': v.stock,
+            'price': str(v.price) if v.price else str(product.price),
+            'image_url': v.variant_image.url if v.variant_image else (product.image.url if product.image else ''),
+        })
+
+    is_wishlisted = False
+    if request.user.is_authenticated:
+        is_wishlisted = Wishlist.objects.filter(user=request.user, product=product).exists()
 
     context = {
         'product': product,
+        'variants': variants,
+        'variants_json': variants_data,
         'related_products': related_products,
         'reviews': reviews,
         'review_form': review_form,
+        'is_wishlisted': is_wishlisted,
     }
     return render(request, 'store/product_detail.html', context)
+
+
+@login_required
+def wishlist_toggle_view(request, product_id):
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    wishlist_item = Wishlist.objects.filter(user=request.user, product=product).first()
+    
+    if wishlist_item:
+        wishlist_item.delete()
+        added = False
+        message = f"Removed {product.name} from your Wishlist."
+    else:
+        Wishlist.objects.create(user=request.user, product=product)
+        added = True
+        message = f"Added {product.name} to your Wishlist!"
+
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', '')
+    if is_ajax:
+        wishlist_count = Wishlist.objects.filter(user=request.user).count()
+        return JsonResponse({
+            'success': True,
+            'added': added,
+            'message': message,
+            'wishlist_count': wishlist_count
+        })
+
+    messages.info(request, message)
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
+@login_required
+def wishlist_view(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product', 'product__category').prefetch_related('product__variants')
+    return render(request, 'store/wishlist.html', {'wishlist_items': wishlist_items})
 
 
 @login_required
@@ -138,7 +237,7 @@ def add_review_view(request, product_id):
 
 def cart_view(request):
     cart = get_or_create_cart(request)
-    cart_items = cart.items.select_related('product').all()
+    cart_items = cart.items.select_related('product', 'variant').all()
     context = {
         'cart': cart,
         'cart_items': cart_items,
@@ -149,6 +248,12 @@ def cart_view(request):
 def add_to_cart_view(request, product_id):
     if request.method == 'POST':
         product = get_object_or_404(Product, id=product_id, is_active=True)
+        variant_id = request.POST.get('variant_id')
+        variant = None
+        
+        if variant_id:
+            variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+
         try:
             quantity = int(request.POST.get('quantity', 1))
             if quantity <= 0:
@@ -162,24 +267,29 @@ def add_to_cart_view(request, product_id):
             messages.error(request, "Invalid quantity provided.")
             return redirect('product_detail', slug=product.slug)
 
-        if quantity > product.stock:
+        available_stock = variant.stock if variant else product.stock
+
+        if quantity > available_stock:
+            msg = f"Only {available_stock} left in stock for this selection."
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
-                return JsonResponse({'success': False, 'message': f'Only {product.stock} left in stock.'}, status=400)
-            messages.error(request, f"Sorry, only {product.stock} items in stock for {product.name}.")
+                return JsonResponse({'success': False, 'message': msg}, status=400)
+            messages.error(request, msg)
             return redirect('product_detail', slug=product.slug)
 
         cart = get_or_create_cart(request)
         cart_item, created = CartItem.objects.get_or_create(
             cart=cart,
             product=product,
+            variant=variant,
             defaults={'quantity': quantity}
         )
 
         if not created:
-            if (cart_item.quantity + quantity) > product.stock:
+            if (cart_item.quantity + quantity) > available_stock:
+                msg = f"Cannot add more. Stock limit of {available_stock} reached."
                 if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
-                    return JsonResponse({'success': False, 'message': f'Cannot add more. Stock limit of {product.stock} reached.'}, status=400)
-                messages.warning(request, f"Cannot add more. Stock limit of {product.stock} reached.")
+                    return JsonResponse({'success': False, 'message': msg}, status=400)
+                messages.warning(request, msg)
                 return redirect('cart')
             cart_item.quantity += quantity
             cart_item.save()
@@ -187,16 +297,18 @@ def add_to_cart_view(request, product_id):
         # Check for AJAX request
         is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', '')
         if is_ajax:
+            item_desc = f"{product.name} ({variant})" if variant else product.name
             return JsonResponse({
                 'success': True,
                 'cart_item_count': cart.get_total_items,
-                'message': f'✓ Added {product.name} to cart!'
+                'message': f'✓ Added {item_desc} to cart!'
             })
 
         messages.success(request, f"Added {product.name} to your cart!")
         return redirect('cart')
 
     return redirect('home')
+
 
 
 def update_cart_view(request, item_id):
@@ -236,7 +348,7 @@ def remove_from_cart_view(request, item_id):
 @login_required
 def checkout_view(request):
     cart = get_or_create_cart(request)
-    cart_items = cart.items.select_related('product').all()
+    cart_items = cart.items.select_related('product', 'variant').all()
 
     if not cart_items.exists():
         messages.warning(request, "Your cart is empty. Add items before checking out.")
@@ -247,11 +359,16 @@ def checkout_view(request):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # Lock product rows and verify stock under concurrent conditions
+                    # Lock product and variant rows and verify stock
                     for item in cart_items:
                         product_locked = Product.objects.select_for_update().get(id=item.product.id)
-                        if item.quantity > product_locked.stock:
-                            raise ValueError(f"Insufficient stock for {product_locked.name}. Only {product_locked.stock} remaining.")
+                        if item.variant:
+                            variant_locked = ProductVariant.objects.select_for_update().get(id=item.variant.id)
+                            if item.quantity > variant_locked.stock:
+                                raise ValueError(f"Insufficient stock for {product_locked.name} ({variant_locked.color_name} {variant_locked.size or ''}). Only {variant_locked.stock} remaining.")
+                        else:
+                            if item.quantity > product_locked.stock:
+                                raise ValueError(f"Insufficient stock for {product_locked.name}. Only {product_locked.stock} remaining.")
 
                     order = form.save(commit=False)
                     order.user = request.user
@@ -261,15 +378,25 @@ def checkout_view(request):
 
                     for item in cart_items:
                         product_locked = Product.objects.select_for_update().get(id=item.product.id)
+                        variant_locked = None
+                        v_info = ""
+                        if item.variant:
+                            variant_locked = ProductVariant.objects.select_for_update().get(id=item.variant.id)
+                            variant_locked.stock -= item.quantity
+                            variant_locked.save()
+                            v_info = str(item.variant)
+
                         OrderItem.objects.create(
                             order=order,
                             product=product_locked,
+                            variant=variant_locked,
                             product_name=product_locked.name,
-                            price=product_locked.price,
+                            variant_info=v_info,
+                            price=item.unit_price,
                             quantity=item.quantity
                         )
-                        # Deduct stock on locked row
-                        product_locked.stock -= item.quantity
+                        # Deduct main product stock
+                        product_locked.stock = max(0, product_locked.stock - item.quantity)
                         product_locked.save()
 
                     # Clear cart
@@ -296,6 +423,7 @@ def checkout_view(request):
         'cart_items': cart_items,
     }
     return render(request, 'store/checkout.html', context)
+
 
 
 @login_required

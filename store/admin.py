@@ -1,16 +1,23 @@
 from django.contrib import admin
-from .models import Category, Product, Cart, CartItem, Order, OrderItem, Review
+from .models import Category, Product, ProductVariant, Wishlist, Cart, CartItem, Order, OrderItem, Review
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'product_count')
+    list_display = ('name', 'parent', 'slug', 'product_count')
+    list_filter = ('parent',)
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name', 'slug')
 
     def product_count(self, obj):
         return obj.products.count()
     product_count.short_description = 'Products'
+
+
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
+    fields = ('color_name', 'color_code', 'size', 'stock', 'price', 'variant_image')
 
 
 @admin.register(Product)
@@ -20,11 +27,18 @@ class ProductAdmin(admin.ModelAdmin):
     list_editable = ('price', 'stock', 'is_active')
     search_fields = ('name', 'slug', 'description')
     prepopulated_fields = {'slug': ('name',)}
+    inlines = [ProductVariantInline]
+
+
+@admin.register(Wishlist)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'created_at')
+    search_fields = ('user__username', 'product__name')
 
 
 class CartItemInline(admin.TabularInline):
     model = CartItem
-    raw_id_fields = ['product']
+    raw_id_fields = ['product', 'variant']
     extra = 0
 
 
@@ -37,7 +51,7 @@ class CartAdmin(admin.ModelAdmin):
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    raw_id_fields = ['product']
+    raw_id_fields = ['product', 'variant']
     extra = 0
 
 
@@ -56,5 +70,6 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ('product', 'user', 'rating', 'created_at')
     list_filter = ('rating', 'created_at')
     search_fields = ('product__name', 'user__username', 'comment')
+
 
 
