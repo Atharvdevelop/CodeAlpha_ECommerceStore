@@ -8,12 +8,12 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-cyan-bright text-decoration-none fw-medium">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-secondary text-decoration-none fw-medium">Home</a></li>
             {% if product.category.parent %}
-                <li class="breadcrumb-item"><a href="{% url 'home' %}?category={{ product.category.parent.slug }}" class="text-cyan-bright text-decoration-none fw-medium">{{ product.category.parent.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'home' %}?category={{ product.category.parent.slug }}" class="text-secondary text-decoration-none fw-medium">{{ product.category.parent.name }}</a></li>
             {% endif %}
-            <li class="breadcrumb-item"><a href="{% url 'home' %}?category={{ product.category.slug }}" class="text-cyan-bright text-decoration-none fw-medium">{{ product.category.name }}</a></li>
-            <li class="breadcrumb-item active text-white fw-bold" aria-current="page">{{ product.name }}</li>
+            <li class="breadcrumb-item"><a href="{% url 'home' %}?category={{ product.category.slug }}" class="text-secondary text-decoration-none fw-medium">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">{{ product.name }}</li>
         </ol>
     </nav>
 
@@ -23,13 +23,13 @@
             
             <!-- Left Column: High-Res Image Viewport & Variant Thumbnails -->
             <div class="col-md-6 text-center">
-                <div class="product-card-img-box rounded-4 overflow-hidden mb-3" style="height: 400px; background: rgba(15, 23, 42, 0.5);">
+                <div class="product-card-img-box rounded-4 overflow-hidden mb-3" style="height: 400px; background: #f8fafc;">
                     {% if product.image %}
                         <img id="mainProductImg" src="{{ product.image.url }}" alt="{{ product.name }}" style="height: 100%; object-fit: contain;">
                     {% else %}
                         <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
-                            <i class="bi bi-box-seam display-1 text-cyan-bright mb-2"></i>
-                            <span class="fw-bold fs-5 text-white">sweepKart Showcase</span>
+                            <i class="bi bi-box-seam display-1 text-muted mb-2"></i>
+                            <span class="fw-bold fs-5 text-dark">sweepKart Showcase</span>
                         </div>
                     {% endif %}
                 </div>
@@ -38,13 +38,13 @@
                 {% if variants %}
                     <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
                         {% if product.image %}
-                            <div class="border border-info border-opacity-25 rounded p-1 cursor-pointer bg-dark" style="width: 50px; height: 50px;" onclick="switchMainImage('{{ product.image.url }}')">
+                            <div class="border rounded p-1 cursor-pointer bg-white shadow-sm" style="width: 50px; height: 50px;" onclick="switchMainImage('{{ product.image.url }}')">
                                 <img src="{{ product.image.url }}" alt="Default" style="width: 100%; height: 100%; object-fit: contain;">
                             </div>
                         {% endif %}
                         {% for v in variants %}
                             {% if v.variant_image %}
-                                <div class="border border-secondary border-opacity-25 rounded p-1 cursor-pointer bg-dark" style="width: 50px; height: 50px;" onclick="switchMainImage('{{ v.variant_image.url }}')">
+                                <div class="border rounded p-1 cursor-pointer bg-white shadow-sm" style="width: 50px; height: 50px;" onclick="switchMainImage('{{ v.variant_image.url }}')">
                                     <img src="{{ v.variant_image.url }}" alt="{{ v.color_name }}" style="width: 100%; height: 100%; object-fit: contain;">
                                 </div>
                             {% endif %}
@@ -56,29 +56,30 @@
             <!-- Right Column: Product Specs & Dynamic Variant Form -->
             <div class="col-md-6">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="badge bg-primary bg-opacity-25 text-cyan-bright border border-info border-opacity-25 px-3 py-2">
+                    <span class="category-pill">
                         {{ product.category.name }}
                     </span>
 
                     <!-- Wishlist Action -->
-                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="toggleWishlist({{ product.id }}, this)">
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="toggleWishlist('{{ product.id }}', this)">
                         <i class="bi {% if is_wishlisted %}bi-heart-fill{% else %}bi-heart{% endif %} me-1"></i> Wishlist
                     </button>
                 </div>
                 
-                <h1 class="display-6 fw-bold text-white mb-2">{{ product.name }}</h1>
+                <h1 class="display-6 fw-bold text-dark mb-2">{{ product.name }}</h1>
                 
                 <!-- Average Rating Banner -->
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 fs-6 fw-bold">
-                        {{ product.average_rating }} <i class="bi bi-star-fill small"></i>
-                    </span>
+                    <div class="rating-pill">
+                        <i class="bi bi-star-fill"></i>
+                        <span>{{ product.average_rating }}</span>
+                    </div>
                     <span class="text-secondary small fw-medium">({{ product.review_count }} verified ratings)</span>
                 </div>
 
                 <!-- Price & Stock Indicator -->
                 <div class="d-flex align-items-center gap-3 mb-4">
-                    <span id="displayPrice" class="fs-2 fw-extrabold text-cyan-bright">₹{{ product.price }}</span>
+                    <span id="displayPrice" class="fs-2 fw-extrabold text-dark">₹{{ product.price }}</span>
                     <span id="displayStockBadge">
                         {% if product.in_stock %}
                             <span class="badge-stock">In Stock ({{ product.total_stock }} available)</span>
@@ -94,11 +95,11 @@
 
                 <!-- Interactive Variant Selector -->
                 {% if variants %}
-                    <div class="mb-4 p-3 rounded-3" style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--glass-border);">
+                    <div class="mb-4 p-3 rounded-3 inset-surface">
                         
                         <!-- Color Swatch Selector -->
                         <div class="mb-3">
-                            <label class="form-label text-white small fw-bold mb-2">Select Color:</label>
+                            <label class="form-label text-dark small fw-bold mb-2">Select Color:</label>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for v in variants %}
                                     <button type="button" class="swatch-btn {% if forloop.first %}active{% endif %}" 
@@ -116,7 +117,7 @@
                         <!-- Size Chips -->
                         {% if variants.0.size %}
                             <div>
-                                <label class="form-label text-white small fw-bold mb-2">Select Size:</label>
+                                <label class="form-label text-dark small fw-bold mb-2">Select Size:</label>
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for v in variants %}
                                         {% if v.size %}
@@ -143,23 +144,23 @@
                             <input type="number" name="quantity" class="form-control text-center py-2" value="1" min="1" max="{{ product.stock }}">
                         </div>
                         <div class="align-self-end flex-grow-1">
-                            <button type="submit" class="btn btn-gradient btn-lg w-100 py-3 fs-6">
+                            <button type="submit" class="btn btn-white-primary btn-lg w-100 py-3 fs-6">
                                 <i class="bi bi-cart-plus-fill me-2"></i> Add to Cart
                             </button>
                         </div>
                     </form>
                 {% else %}
-                    <div class="alert alert-warning border-warning text-white bg-dark bg-opacity-50 mb-0">
+                    <div class="alert alert-warning border-warning text-dark mb-0">
                         <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i> This product is currently out of stock. Check back soon!
                     </div>
                 {% endif %}
 
                 <!-- Features Grid -->
-                <div class="mt-4 pt-4 border-top border-secondary border-opacity-25 row g-3 text-secondary small">
-                    <div class="col-6"><i class="bi bi-truck text-cyan-bright fs-5 me-2"></i> Free Express Shipping</div>
-                    <div class="col-6"><i class="bi bi-shield-check text-cyan-bright fs-5 me-2"></i> 1 Year Product Warranty</div>
-                    <div class="col-6"><i class="bi bi-arrow-counterclockwise text-cyan-bright fs-5 me-2"></i> 7 Days Replacement</div>
-                    <div class="col-6"><i class="bi bi-headset text-cyan-bright fs-5 me-2"></i> 24/7 Dedicated Support</div>
+                <div class="mt-4 pt-4 border-top row g-3 text-secondary small">
+                    <div class="col-6"><i class="bi bi-truck text-emerald fs-5 me-2"></i> Free Express Shipping</div>
+                    <div class="col-6"><i class="bi bi-shield-check text-emerald fs-5 me-2"></i> 1 Year Product Warranty</div>
+                    <div class="col-6"><i class="bi bi-arrow-counterclockwise text-emerald fs-5 me-2"></i> 7 Days Replacement</div>
+                    <div class="col-6"><i class="bi bi-headset text-emerald fs-5 me-2"></i> 24/7 Dedicated Support</div>
                 </div>
             </div>
         </div>
@@ -167,12 +168,12 @@
 
     <!-- Reviews Section -->
     <div class="glass-card p-4 p-md-5 mb-4">
-        <h4 class="fw-bold text-white mb-4"><i class="bi bi-star-fill text-warning me-2"></i> Verified Ratings & Reviews</h4>
+        <h4 class="fw-bold text-dark mb-4"><i class="bi bi-star-fill text-warning me-2"></i> Verified Ratings & Reviews</h4>
         
         <div class="row g-4">
             <div class="col-lg-5">
-                <div class="p-4 rounded-3" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border);">
-                    <h5 class="fw-bold text-white mb-3">Write a Customer Review</h5>
+                <div class="p-4 rounded-3 inset-surface">
+                    <h5 class="fw-bold text-dark mb-3">Write a Customer Review</h5>
                     {% if user.is_authenticated %}
                         <form action="{% url 'add_review' product_id=product.id %}" method="POST">
                             {% csrf_token %}
@@ -184,11 +185,11 @@
                                 <label class="form-label text-muted small fw-bold">Review Comment</label>
                                 {{ review_form.comment }}
                             </div>
-                            <button type="submit" class="btn btn-gradient fw-bold w-100">Submit Review</button>
+                            <button type="submit" class="btn btn-white-primary fw-bold w-100">Submit Review</button>
                         </form>
                     {% else %}
                         <p class="text-secondary small mb-3">Please log in to leave your rating and review for this product.</p>
-                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-gradient btn-sm fw-bold w-100">Log In to Review</a>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-glass-secondary btn-sm fw-bold w-100">Log In to Review</a>
                     {% endif %}
                 </div>
             </div>
@@ -200,10 +201,10 @@
                             <div class="p-3 glass-card">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                        <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
                                             {{ r.user.username|slice:":1"|upper }}
                                         </div>
-                                        <span class="fw-bold text-white">{{ r.user.username }}</span>
+                                        <span class="fw-bold text-dark">{{ r.user.username }}</span>
                                     </div>
                                     <span class="badge bg-warning text-dark fw-bold px-2 py-1">
                                         {{ r.rating }} ★
@@ -217,7 +218,7 @@
                 {% else %}
                     <div class="p-4 text-center text-muted glass-card">
                         <i class="bi bi-chat-square-text display-6 text-muted mb-2"></i>
-                        <h6 class="fw-bold text-white">No Customer Reviews Yet</h6>
+                        <h6 class="fw-bold text-dark">No Customer Reviews Yet</h6>
                         <p class="small mb-0">Be the first verified customer to share your thoughts!</p>
                     </div>
                 {% endif %}

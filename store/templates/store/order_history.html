@@ -44,7 +44,7 @@
                                     <a href="{% url 'download_invoice' order_id=order.id %}" class="btn btn-outline-danger btn-sm me-1" title="Download PDF Invoice">
                                         <i class="bi bi-file-earmark-pdf-fill"></i> PDF
                                     </a>
-                                    <a href="{% url 'order_confirm' order_id=order.id %}" class="btn btn-outline-gradient btn-sm">
+                                    <a href="{% url 'order_confirm' order_id=order.id %}" class="btn btn-glass-secondary btn-sm">
                                         View Details <i class="bi bi-chevron-right ms-1"></i>
                                     </a>
                                 </td>
@@ -60,7 +60,7 @@
             <i class="bi bi-box-seam display-3 text-primary mb-3"></i>
             <h4 class="text-dark fw-bold">No Past Orders Found</h4>
             <p class="text-secondary mb-4">You haven't placed any orders on sweepKart yet.</p>
-            <a href="{% url 'home' %}" class="btn btn-gradient btn-lg">Explore Store</a>
+            <a href="{% url 'home' %}" class="btn btn-white-primary btn-lg">Explore Store</a>
         </div>
     {% endif %}
 </div>

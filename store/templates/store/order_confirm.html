@@ -74,13 +74,13 @@
         </div>
 
         <div class="d-flex flex-wrap gap-3 justify-content-center">
-            <a href="{% url 'download_invoice' order_id=order.id %}" class="btn btn-primary fw-bold">
+            <a href="{% url 'download_invoice' order_id=order.id %}" class="btn btn-outline-danger fw-bold">
                 <i class="bi bi-file-earmark-pdf-fill me-2"></i> Download PDF Invoice
             </a>
-            <a href="{% url 'order_history' %}" class="btn btn-outline-gradient">
+            <a href="{% url 'order_history' %}" class="btn btn-glass-secondary">
                 <i class="bi bi-clock-history me-2"></i> View Order History
             </a>
-            <a href="{% url 'home' %}" class="btn btn-gradient">
+            <a href="{% url 'home' %}" class="btn btn-white-primary">
                 <i class="bi bi-house-door-fill me-2"></i> Continue Shopping
             </a>
         </div>
