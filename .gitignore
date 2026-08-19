@@ -13,7 +13,8 @@ __pycache__/
 db.sqlite3
 db.sqlite3-journal
 staticfiles/
-media/
+media/*
+!media/products/
 
 # Virtual environment
 venv/
