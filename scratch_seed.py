@@ -47,6 +47,7 @@ seed_data = [
         'category': sub_men_jackets,
         'price': 3499.00,
         'stock': 30,
+        'image': 'products/leather_jacket.jpg',
         'description': 'Premium genuine leather jacket with heavy duty zippers, quilted shoulder padding, and soft satin interior lining.',
         'variants': [
             {'color_name': 'Midnight Black', 'color_code': '#0a0a0a', 'size': 'M', 'stock': 10, 'price': 3499.00},
@@ -59,6 +60,7 @@ seed_data = [
         'category': sub_men_shirts,
         'price': 1299.00,
         'stock': 40,
+        'image': 'products/denim_shirt.jpg',
         'description': 'Breathable cotton denim shirt with button-down collar and double chest flap pockets.',
         'variants': [
             {'color_name': 'Ocean Blue', 'color_code': '#2563eb', 'size': 'S', 'stock': 10, 'price': 1299.00},
@@ -71,6 +73,7 @@ seed_data = [
         'category': sub_women_hoodies,
         'price': 1899.00,
         'stock': 35,
+        'image': 'products/fleece_hoodie.jpg',
         'description': 'Ultra-cozy plush fleece pullover hoodie featuring kangaroo pocket and ribbed storm cuffs.',
         'variants': [
             {'color_name': 'Blush Pink', 'color_code': '#f472b6', 'size': 'S', 'stock': 10, 'price': 1899.00},
@@ -83,6 +86,7 @@ seed_data = [
         'category': sub_women_dresses,
         'price': 2799.00,
         'stock': 20,
+        'image': 'products/maxi_dress.jpg',
         'description': 'Sophisticated floor-length dress made with flowing chiffon fabric and metallic accent waist belt.',
         'variants': [
             {'color_name': 'Emerald Green', 'color_code': '#059669', 'size': 'M', 'stock': 10, 'price': 2799.00},
@@ -94,6 +98,7 @@ seed_data = [
         'category': sub_kids_wear,
         'price': 899.00,
         'stock': 50,
+        'image': 'products/kids_tshirt.jpg',
         'description': 'Set of 2 hypoallergenic 100% organic cotton graphic printed crew-neck t-shirts for toddlers and kids.',
         'variants': [
             {'color_name': 'Sunshine Yellow', 'color_code': '#eab308', 'size': 'S', 'stock': 25, 'price': 899.00},
@@ -105,6 +110,7 @@ seed_data = [
         'category': sub_audio,
         'price': 4999.00,
         'stock': 25,
+        'image': 'products/headphones.jpg',
         'description': 'High-fidelity audio with hybrid active noise cancellation, 40-hour battery life, and spatial audio support.',
         'variants': [
             {'color_name': 'Space Silver', 'color_code': '#94a3b8', 'size': None, 'stock': 15, 'price': 4999.00},
@@ -116,6 +122,7 @@ seed_data = [
         'category': sub_watches,
         'price': 3299.00,
         'stock': 30,
+        'image': 'products/smartwatch.jpg',
         'description': 'AMOLED touch display with continuous SpO2 monitor, GPS, 100+ workout modes, and 5ATM waterproof rating.',
         'variants': [
             {'color_name': 'Obsidian Black', 'color_code': '#000000', 'size': None, 'stock': 15, 'price': 3299.00},
@@ -131,6 +138,7 @@ for p_data in seed_data:
             'category': p_data['category'],
             'price': p_data['price'],
             'stock': p_data['stock'],
+            'image': p_data.get('image', ''),
             'description': p_data['description'],
             'is_active': True,
         }
